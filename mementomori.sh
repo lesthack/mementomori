@@ -13,6 +13,14 @@ if [ $# -eq 0 ]; then
     exit 0
 fi
 
+get_random_phrase() {
+  phrases='./phrases.md'
+  num_lineas=$(wc -l < "$phrases")
+  linea_random=$((RANDOM % num_lineas + 1))
+  linea=$(awk "NR==$linea_random" "$phrases")
+  echo $linea
+}
+
 do_commits_from() {
     # Parámetro: fecha en formato YYYY-MM-DD
     fecha_inicial=$1
@@ -40,10 +48,11 @@ do_commits_from() {
         if [ ! -d "$year" ]; then
           mkdir $year
         fi
-        echo "Memento Mori" > $year/$fecha_actual.md
+        phrase="$(get_random_phrase)"
+        echo "$phrase" > $year/$fecha_actual.md
         git add $year/$fecha_actual.md
-        GIT_AUTHOR_DATE="$fecha_actual 12:00:00" GIT_COMMITTER_DATE="$fecha_actual 12:00:00" git commit -m "Commit 'mementomori'"
-        # Avanzar 7 días (una semana)
+        GIT_AUTHOR_DATE="$fecha_actual 12:00:00" GIT_COMMITTER_DATE="$fecha_actual 12:00:00" git commit -m "$phrase"
+        ## Avanzar 7 días (una semana)
         fecha_actual=$(date -d "$fecha_actual + 7 days" +%Y-%m-%d)
     done
 }
